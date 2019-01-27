@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.tarena.dao.AccountMapper">
+
+	<select id="findByPage" parameterType="com.tarena.entity.page.AccountPage"
+				resultType="com.tarena.entity.Account">
+		select * from (
+			select a.*,rownum r from (
+				select * from account_zx 
+				<where>
+					<if test='idcardNo!=null &amp;&amp; !idcardNo.equals("")'>
+						and idcard_no=#{idcardNo}
+					</if>
+					<if test='realName!=null &amp;&amp; !realName.equals("")'>
+						and real_name=#{realName}
+					</if>
+					<if test='loginName!=null &amp;&amp; !loginName.equals("")'>
+						and login_name=#{loginName}
+					</if>
+					<if test='status!=null &amp;&amp; !status.equals("")'>
+						and status=#{status}
+					</if>
+				</where>
+				order by account_id)a)
+					where r>#{begin} and r&lt;#{end}
+	</select>
+	
+	<select id="findRows" parameterType="com.tarena.entity.page.AccountPage" resultType="int">
+		select count(*) from account_zx
+		<where>
+			<if test='idcardNo!=null &amp;&amp; !idcardNo.equals("")'>
+				and idcard_no=#{idcardNo}
+			</if>
+			<if test='realName!=null &amp;&amp; !realName.equals("")'>
+				and real_name=#{realName}
+			</if>
+			<if test='loginName!=null &amp;&amp; !loginName.equals("")'>
+				and login_name=#{loginName}
+			</if>
+			<if test='status!=null &amp;&amp; !status.equals("")'>
+				and status=#{status}
+			</if>
+		</where>	
+	</select>
+	
+	<!-- 暂停一条帐务帐号 -->
+	<update id="pause" parameterType="int">
+		update account_zx set status='1',pause_date=sysdate where account_id=#{id}
+	</update>
+	
+	<update id="start" parameterType="int">
+		update account_zx set status='0',create_date=sysdate where account_id=#{id}
+	</update>
+	
+	<update id="delete" parameterType="int">
+		update account_zx set status='2',close_date=sysdate where account_id=#{id}
+	</update>
+	
+	<insert id="insert" parameterType="com.tarena.entity.Account">
+		insert into account_zx values (
+			account_seq_zx.nextval,
+			#{recommender_id,jdbcType=INTEGER},
+			#{login_name,jdbcType=VARCHAR},
+			#{login_passwd,jdbcType=VARCHAR},
+			#{status,jdbcType=CHAR},
+			#{create_date,jdbcType=TIMESTAMP},
+			#{pause_date,jdbcType=TIMESTAMP},
+			#{close_date,jdbcType=TIMESTAMP},
+			#{real_name,jdbcType=VARCHAR},
+			#{idcard_no,jdbcType=INTEGER},
+			#{birthdate,jdbcType=DATE},
+			#{gender,jdbcType=CHAR},
+			#{occupation,jdbcType=CHAR},
+			#{telephone,jdbcType=VARCHAR},
+			#{email,jdbcType=VARCHAR},
+			#{mailaddress,jdbcType=VARCHAR},
+			#{zipcode,jdbcType=VARCHAR},
+			#{qq,jdbcType=VARCHAR},
+			#{last_login_time,jdbcType=TIMESTAMP},
+			#{last_login_ip,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<!-- 根据帐号ID查询帐务帐号 -->
+	<select id="findByAccountId" parameterType="int" resultType="com.tarena.entity.Account">
+		select * from account_zx where account_id=#{id}
+	</select>
+	
+	<update id="update" parameterType="com.tarena.entity.Account">
+		update account_zx set 
+			real_name=#{real_name,jdbcType=VARCHAR},
+			idcard_no=#{idcard_no,jdbcType=INTEGER},
+			login_name=#{login_name,jdbcType=VARCHAR},
+			telephone=#{telephone,jdbcType=VARCHAR},
+			birthdate=#{birthdate,jdbcType=TIMESTAMP}
+				where account_id=#{account_id,jdbcType=INTEGER}
+	</update>
+	
+	<!-- 根据身份证号查询帐务帐号 -->
+	<select id="findByIdcardNo" parameterType="string" resultType="com.tarena.entity.Account">
+		select * from account_zx where idcard_no=#{id}
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+
+</mapper>

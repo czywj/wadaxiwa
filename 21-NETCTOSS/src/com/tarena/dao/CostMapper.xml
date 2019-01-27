@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.tarena.dao.CostMapper">
+
+	<!-- 查询全部资费 -->
+	<select id="findAll" resultType="com.tarena.entity.Cost">
+		select * from cost_zx order by cost_id
+	</select>
+	
+	<!-- 保存一条资费 -->
+	<!-- 插入时，如果传入的属性为null，则MyBatis底层在实现接口时，无法识别null类型，会导致类型错误。
+		为了避免这个发生，可以在参数上通过jdbcType来设置该字段的数据类型，明确告诉MyBatis按照什么类型来处理。
+		注：一般一个表的字段很多，其中为空的列必须写jdbcType，不能为空的可以不写，
+			但是我们懒得无区别一般都写上，就没问题了。 -->
+	<insert id="save" parameterType="com.tarena.entity.Cost">
+		insert into cost_zx values (
+			cost_seq_zx.nextval,
+			#{name,jdbcType=VARCHAR},
+			#{base_duration,jdbcType=INTEGER},
+			#{base_cost,jdbcType=DOUBLE},
+			#{unit_cost,jdbcType=DOUBLE},
+			#{status,jdbcType=CHAR},
+			#{descr,jdbcType=VARCHAR},
+			#{creatime,jdbcType=TIMESTAMP},
+			#{startime,jdbcType=TIMESTAMP},
+			#{cost_type,jdbcType=CHAR})
+	</insert>
+	
+	<!-- 根据id查询资费 -->
+	<!-- 
+			parameterType如果指定的是一个实体对象，则#{}中需要写对象中的属性名，明确指定当前引用的是哪个属性的值；
+			parameterType如果指定的是一个基本类型，则#{}中随便写一个变量名都行，因为是由唯一的一个参数，
+			无论如何都会使用这个参数赋值，变量名就不重要了
+	 -->
+	<select id="findById" parameterType="int" resultType="com.tarena.entity.Cost">
+		select * from cost_zx where cost_id=#{id}
+	</select>
+	
+	<!-- 修改一条资费数据 -->
+	<update id="update" parameterType="com.tarena.entity.Cost">
+		update cost_zx set name=#{name,jdbcType=VARCHAR},
+								base_duration=#{base_duration,jdbcType=INTEGER},
+								base_cost=#{base_cost,jdbcType=DOUBLE},
+								unit_cost=#{unit_cost,jdbcType=DOUBLE},
+								descr=#{descr,jdbcType=VARCHAR},
+								cost_type=#{cost_type,jdbcType=CHAR}
+						  where cost_id=#{cost_id}
+	</update>
+	
+	<!-- 开通资费 -->
+	<update id="start" parameterType="int">
+		update cost_zx set status='0',creatime=sysdate where cost_id=#{id}
+	</update>
+	
+	<!-- 删除一条资费数据 -->
+	<delete id="delete" parameterType="int">
+		delete  from cost_zx where cost_id=#{id}
+	</delete>
+	
+	<!-- 分页查询资费数据 -->
+	<select id="findByPage" parameterType="com.tarena.entity.page.CostPage"
+				resultType="com.tarena.entity.Cost">
+		select * from (
+			select a.*,rownum r from (
+				select * from cost_zx order by cost_id)a)
+					where r&gt;#{begin} and r&lt;#{end}
+	</select>
+	
+	<!-- 查询总行数 -->
+	<select id="findRows" resultType="int">
+		select count(*) from cost_zx
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+</mapper>

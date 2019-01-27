@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.tarena.dao.ServiceMapper">
+
+	<!-- 分页查询 -->
+	<select id="findByPage"
+		parameterType="com.tarena.entity.page.ServicePage"
+		resultType="hashmap">
+		select * from (
+			select a.*,rownum r from (
+					select s.*,
+					a.idcard_no,
+					a.real_name,
+					c.name as cost_name,
+					c.descr	
+				from service_zx s
+				join account_zx a on a.account_id=s.account_id
+				join cost_zx c on c.cost_id=s.cost_id
+				<where>
+					<if test='osUserName!=null &amp;&amp; !osUserName.equals("")'>
+						and s.os_username=#{osUserName}
+					</if>
+					<if test='unixHost!=null &amp;&amp; !unixHost.equals("")'>
+						and s.unix_host=#{unixHost}
+					</if>
+					<if test='idcardNo!=null &amp;&amp; !idcardNo.equals("")'>
+						and a.idcard_no=#{idcardNo}
+					</if>
+					<if test='status!=null &amp;&amp; !status.equals("")'>
+						and s.status=#{status}
+					</if>
+				</where>
+				order by s.service_id
+			) a
+		) where r>#{begin} and r&lt;#{end}		
+	</select>
+	
+	<!-- 查询总行数 -->
+	<select id="findRows" parameterType="com.tarena.entity.page.ServicePage"
+					resultType="int">
+		select count(*) from service_zx s
+			join account_zx a on a.account_id=s.account_id
+			join cost_zx c on c.cost_id=s.cost_id
+			<where>
+				<if test='osUserName!=null &amp;&amp;!osUserName.equals("")'>
+					and s.os_userName=#{osUserName}
+				</if>
+				<if test='unixHost!=null &amp;&amp;!unixHost.equals("")'>
+					and s.unix_host=#{unixHost}
+				</if>
+				<if test='idcardNo!=null &amp;&amp;!idcardNo.equals("")'>
+					and a.idcard_no=#{idcardNo}
+				</if>
+				<if test='status!=null &amp;&amp;!status.equals("")'>
+					and s.status=#{status}
+				</if>
+			</where>
+	</select>
+	
+	<!-- deleteByAccount -->
+	<update id="deleteByAccount" parameterType="int">
+		update service_zx set status='2',close_date=SYSDATE 
+		where account_id=#{accountId}
+	</update>
+	
+	<!-- pauseByAccount -->
+	<update id="pauseByAccount" parameterType="int">
+		update service_zx set status='1',pause_date=SYSDATE
+		where account_id=#{accountId}
+	</update>
+	
+	<!-- save -->
+	<insert id="save" parameterType="com.tarena.entity.Service">
+		insert into service_zx values (
+			service_seq_zx.nextval,
+			#{account_id,jdbcType=NUMERIC},
+			#{unix_host,jdbcType=VARCHAR},
+			#{os_username,jdbcType=VARCHAR},
+			#{login_passwd,jdbcType=VARCHAR},
+			#{status,jdbcType=VARCHAR},
+			#{create_date,jdbcType=TIMESTAMP},
+			#{pause_date,jdbcType=TIMESTAMP},
+			#{close_date,jdbcType=TIMESTAMP},
+			#{cost_id,jdbcType=NUMERIC}
+		)
+	</insert>
+	
+	<!-- updateStatus -->
+	<update id="updateStatus" parameterType="com.tarena.entity.Service">
+		update service_zx set status=#{status},
+		<choose>
+			<when test="status==0">
+				pause_date=null
+			</when>
+			<when test="status==1">
+				pause_date=SYSDATE
+			</when>
+			<otherwise>
+				close_date=SYSDATE
+			</otherwise>
+		</choose>
+		where service_id=#{service_id}
+	</update>
+	
+	<!-- findById -->
+	<select id="findById" parameterType="int"
+			resultType="com.tarena.entity.Service"	>
+			select * from service_zx where service_id=#{id}
+	</select>
+	
+	<insert id="update" parameterType="com.tarena.entity.Service">
+		insert into service_update_bak_zx values(
+			service_bak_seq_zx.nextval,
+			#{service_id,jdbcType=NUMERIC},
+			#{cost_id,jdbcType=NUMERIC}
+		)
+	</insert>
+	
+	
+	
+	
+	
+
+</mapper>

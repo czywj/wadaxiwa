@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.tarena.dao.UserMapper">
+
+	<select id="findAdmin" parameterType="string" resultMap="userMap">
+		select * from admin_info_zx where admin_code=#{adminCode}
+ 	</select>
+ 	<!-- 查询管理员对应的角色 -->
+ 	<select id="findRoleByAdminId" parameterType="string"
+ 				resultType="com.tarena.entity.Role">
+ 		select * from role_info_zx where role_id in(
+ 			select role_id from admin_role_zx where admin_id in (
+ 				select admin_id from admin_info_zx where admin_code=#{adminCode})
+ 		)
+ 	</select>
+ 	<!-- 使用resultMap将管理员和角色自动装配 -->
+ 	<resultMap id="userMap" type="com.tarena.entity.Admin">
+ 		<id column="admin_code" property="admin_code"/>
+ 		<collection select="findRoleByAdminId" column="admin_code"
+ 						javaType="arraylist"
+ 						ofType="com.tarena.entity.Role"
+ 						property="roles">
+ 		</collection>
+ 	</resultMap>
+
+
+	<select id="findByAdminId" parameterType="int"
+ 				resultMap="roleMap">
+ 		select * from admin_info_zx where admin_id=#{admin_id}
+ 	</select>
+	<select id="findByRoleId" parameterType="int" 
+				resultType="com.tarena.entity.Role">
+		select ri.* from role_info_zx ri join admin_role_zx ar 
+			on ri.role_id=ar.role_id where admin_id = #{admin_id}
+	</select>
+	<resultMap type="com.tarena.entity.Admin" id="roleMap">
+		<association select="findByRoleId"
+			column="admin_id"
+			javaType="com.tarena.entity.Role" 
+			property="role">
+		</association>
+	</resultMap>
+	
+	<!-- update -->
+	<update id="update" parameterType="com.tarena.entity.Admin">
+		update admin_info_zx set 
+			name=#{name,jdbcType=VARCHAR},
+			telephone=#{telephone,jdbcType=VARCHAR},
+			email=#{email,jdbcType=VARCHAR}
+		where admin_id=#{admin_id}
+	</update>
+
+</mapper>

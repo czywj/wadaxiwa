@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.tarena.dao.PwdMapper">
+
+	<!-- update -->
+	<update id="update" parameterType="com.tarena.entity.Admin">
+		update admin_info_zx set 
+			password=#{password,jdbcType=VARCHAR}
+		where admin_id=#{admin_id}
+	</update>
+
+</mapper>
